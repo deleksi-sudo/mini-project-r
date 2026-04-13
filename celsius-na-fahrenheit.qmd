@@ -1,0 +1,144 @@
+---
+title: "Prevod teploty: Celsius na Fahrenheit"
+author: Nazar Fomin
+date: today
+lang: sk
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+bibliography: references.bib
+csl: iso690-author-date-sk.csl
+---
+
+# Úvod
+
+Meranie teploty patrí medzi základné fyzikálne merania v prírodných vedách,
+technike aj každodennom živote. V histórii vzniklo viacero teplotných stupníc,
+pričom dve z nich - Celziova a Fahrenheitova - sa dodnes používajú súbežne
+[@halliday2013]. Kým väčšina sveta (vrátane Slovenska) používa stupeň Celzia
+(°C), Spojené štáty americké a niekoľko ďalších krajín stále pracujú s
+Fahrenheitmi (°F). Vzájomný prevod je preto prakticky dôležitou úlohou.
+
+Cieľom tohto dokumentu je odvodiť a demonštrovať vzorec na prevod teploty z
+Celziových stupňov na Fahrenheitove stupne, zostaviť tabuľku prevodových
+hodnôt a graficky znázorniť lineárnu závislosť medzi obidvoma stupnicami.
+
+# Teplotné stupnice a prevodový vzorec
+
+## História teplotných stupníc
+
+Celziova stupnica bola definovaná tak, aby bod tuhnutia vody bol 0 °C a bod
+varu vody 100 °C (pri atmosferickom tlaku). Fahrenheitova stupnica je staršia:
+Daniel Gabriel Fahrenheit stanovil 0 °F ako teplotu zmesi ľadu, vody a
+chloridu amónneho a 96 °F ako teplotu ľudského tela. Na tejto stupnici voda
+tuhne pri 32 °F a vrie pri 212 °F.
+
+## Matematický vzorec
+
+Z lineárnej závislosti oboch stupníc vyplýva prevodový vzorec. Rozsah
+100 celziových stupňov (0 °C - 100 °C) zodpovedá rozsahu 180 fahrenheitových
+stupňov (32 °F - 212 °F), odkiaľ dostaneme pomer $\frac{9}{5}$. Po zohľadnení
+posunutia nulového bodu platí:
+
+$$
+F = \frac{9}{5} \cdot C + 32
+$$ {#eq-conversion}
+
+kde $C$ je teplota v stupňoch Celzia a $F$ je teplota v stupňoch Fahrenheita.
+Vzorec @eq-conversion je lineárnou funkciou s smernicou $\frac{9}{5} = 1{,}8$
+a posunom $+32$.
+
+# Tabuľka prevodových hodnôt
+
+Pomocou vzorca @eq-conversion vypočítame hodnoty pre vybraný súbor teplôt
+bežne sa vyskytujúcich v praxi (@tbl-teploty).
+
+```{python}
+#| label: tbl-teploty
+#| tbl-cap: "Prevod vybraných teplôt z Celziových na Fahrenheitové stupne"
+#| echo: false
+
+import pandas as pd
+
+celsius_values = [-20, -10, 0, 10, 20, 37, 100]
+fahrenheit_values = [(9/5) * c + 32 for c in celsius_values]
+
+df = pd.DataFrame({
+    "Teplota (°C)": celsius_values,
+    "Teplota (°F)": fahrenheit_values
+})
+
+df["Teplota (°F)"] = df["Teplota (°F)"].map(lambda x: f"{x:.1f}")
+
+print(df.to_markdown(index=False))
+```
+
+Z tabuľky @tbl-teploty je zrejmé, že teplota ľudského tela (37 °C) zodpovedá
+98,6 °F, a že bod mrazu (0 °C) leží na 32 °F - hodnota charakteristická pre
+Fahrenheitovu stupnicu.
+
+# Grafická závislosť
+
+Pre lepšiu ilustráciu lineárnej povahy prevodového vzorca @eq-conversion
+znázorňuje @fig-graf závislosť teploty vo Fahrenheitoch od teploty v Celziách
+v rozsahu od −30 °C do 110 °C.
+
+```{python}
+#| label: fig-graf
+#| fig-cap: "Závislosť teploty vo Fahrenheitoch (°F) od teploty v Celziách (°C)"
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+c_range = np.linspace(-30, 110, 300)
+f_range = (9/5) * c_range + 32
+
+fig, ax = plt.subplots(figsize=(7, 4.5))
+
+ax.plot(c_range, f_range, color="#2563eb", linewidth=2.2, label=r"$F = \frac{9}{5}C + 32$")
+
+# Highlight notable points
+notable_c = [-20, -10, 0, 10, 20, 37, 100]
+notable_f = [(9/5)*c + 32 for c in notable_c]
+ax.scatter(notable_c, notable_f, color="#dc2626", zorder=5, s=50, label="Vybrané hodnoty")
+
+ax.axhline(32, color="gray", linestyle="--", linewidth=0.8, alpha=0.7)
+ax.axvline(0,  color="gray", linestyle="--", linewidth=0.8, alpha=0.7)
+
+ax.set_xlabel("Teplota (°C)", fontsize=11)
+ax.set_ylabel("Teplota (°F)", fontsize=11)
+ax.set_title("Prevod Celsius → Fahrenheit", fontsize=12, fontweight="bold")
+ax.legend(fontsize=10)
+ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())
+ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
+ax.grid(True, which="major", linestyle="--", alpha=0.4)
+ax.grid(True, which="minor", linestyle=":", alpha=0.2)
+
+fig.tight_layout()
+plt.show()
+```
+
+Graf (@fig-graf) potvrdzuje lineárny charakter závislosti. Červené body
+zodpovedajú hodnotám z tabuľky @tbl-teploty. Prerušované čiary označujú
+bod mrazu (0 °C = 32 °F).
+
+# Záver
+
+V tomto dokumente sme odvodili a overili vzorec na prevod teploty z Celziových
+na Fahrenheitové stupne (pozri @eq-conversion). Tabuľka (@tbl-teploty) uvádza
+prakticky dôležité hodnoty vrátane bodu mrazu, telesnej teploty a bodu varu.
+Graf (@fig-graf) graficky dokumentuje lineárnu závislosť oboch stupníc.
+
+Pochopenie vzájomného vzťahu teplotných stupníc má praktický význam nielen
+v každodennom živote, ale aj v medzinárodnej vedeckej komunikácii, kde sa
+stretneme s obidvoma konvenciami.
+
+# Zoznam použitej literatúry {.unnumbered}
+
+::: {#refs}
+:::
